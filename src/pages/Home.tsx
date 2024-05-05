@@ -6,10 +6,16 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { GeoJSON as GeoJSONClass } from "../classes/GeoJSON";
 import useGeoLocation from "../hooks/useGeolocation";
 import { useQuery } from "@tanstack/react-query";
-import { getCSVData } from "../services/getCSVData";
+import { FormattedCSVDataProperties, getCSVData } from "../services/getCSVData";
+import BottomSheet from "../components/BottomSheet";
+import MarkerBottomSheetData from "../components/MarkerBottomSheetData";
 
 function MapContent() {
   const [loadingMap, setLoadingMap] = useState(true);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [markerToDisplay, setMarkerToDisplay] =
+    useState<FormattedCSVDataProperties | null>(null);
+
   const mapRef = useRef<Map | null>(null);
 
   const flyToCoordinate = (coordinates: [number, number]) => {
@@ -17,6 +23,10 @@ function MapContent() {
       animate: true,
       duration: 1,
     });
+  };
+
+  const closeBottomSheetCallback = () => {
+    setMarkerToDisplay(null);
   };
 
   const { coords: userCoords } = useGeoLocation({
@@ -37,12 +47,13 @@ function MapContent() {
 
     var layer = new GeoJSON(data, {
       style: {},
-      pointToLayer: (feature, latlng) => {
+      pointToLayer: (_feature, latlng) => {
         return new Marker(latlng);
       },
       onEachFeature: (feature, layer) => {
         layer.on("click", () => {
-          console.log("clicou em:", layer);
+          setIsBottomSheetOpen(true);
+          setMarkerToDisplay(feature.properties);
         });
       },
     });
@@ -51,42 +62,54 @@ function MapContent() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-4 border-2 border-gray-200 shadow-lg rounded">
-      <MapContainer
-        center={userCoords}
-        zoom={13}
-        scrollWheelZoom={false}
-        ref={(ref) => {
-          ref?.whenReady(() => {
-            setLoadingMap(false);
-          });
-          mapRef.current = ref;
-        }}
-        className="h-[600px] w-full"
-      >
-        {loadingMap || isLoadingCSVData ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "600px",
-            }}
-          >
-            <CircularProgress />
-          </div>
-        ) : (
-          <>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+    <>
+      <div className="mx-auto max-w-4xl p-4 border-2 border-gray-200 shadow-lg rounded">
+        <MapContainer
+          center={userCoords}
+          zoom={13}
+          scrollWheelZoom={false}
+          ref={(ref) => {
+            ref?.whenReady(() => {
+              setLoadingMap(false);
+            });
+            mapRef.current = ref;
+          }}
+          className="h-[600px] w-full"
+        >
+          {loadingMap || isLoadingCSVData ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "600px",
+              }}
+            >
+              <CircularProgress />
+            </div>
+          ) : (
+            <>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
 
-            {renderGeoJSONData()}
-          </>
-        )}
-      </MapContainer>
-    </div>
+              {renderGeoJSONData()}
+            </>
+          )}
+        </MapContainer>
+      </div>
+
+      <BottomSheet
+        isBottomSheetOpen={isBottomSheetOpen}
+        setIsBottomSheetOpen={setIsBottomSheetOpen}
+        closeBottomSheetCallback={closeBottomSheetCallback}
+      >
+        {markerToDisplay ? (
+          <MarkerBottomSheetData markerToDisplay={markerToDisplay} />
+        ) : null}
+      </BottomSheet>
+    </>
   );
 }
 

@@ -11,14 +11,20 @@ export type CoordinatesWithDataType = {
   VOLUNTARIOS: string | null;
 };
 
+export type FormattedCSVDataProperties = Omit<
+  CoordinatesWithDataType,
+  "Latitude" | "Longitude"
+>;
 export type FormattedCSVData = {
   coordinates: number[];
-  properties: Omit<CoordinatesWithDataType, "Latitude" | "Longitude">;
+  properties: FormattedCSVDataProperties;
 };
 
+// Temporariamente utilizando os dados exportados do csv. A ideia é usar este service para servir o frontend através das estruturas já montadas
 export const getCSVData = async (): Promise<FormattedCSVData[]> => {
   const formattedCSVData = csvData.flatMap<FormattedCSVData>((data) => {
-    if (!data.Longitude || !data.Latitude || !data.ENDEREÇO) return [];
+    if (!data.Longitude || !data.Latitude || !data.ENDEREÇO || !data.LOCAL)
+      return [];
 
     return {
       coordinates: [data.Longitude, data.Latitude],
