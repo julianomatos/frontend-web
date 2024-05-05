@@ -5,6 +5,8 @@ import { Map } from "leaflet";
 import CircularProgress from "@mui/material/CircularProgress";
 import { GeoJSON as GeoJSONClass } from "../classes/GeoJSON";
 import useGeoLocation from "../hooks/useGeolocation";
+import { useQuery } from "@tanstack/react-query";
+import { getCSVData } from "../services/getCSVData";
 
 function MapContent() {
   const [loadingMap, setLoadingMap] = useState(true);
@@ -21,17 +23,13 @@ function MapContent() {
     callback: flyToCoordinate,
   });
 
+  const { data: coordinatesWithData, isLoading: isLoadingCSVData } = useQuery({
+    queryKey: ["csv-data"],
+    queryFn: getCSVData,
+  });
+
   const renderGeoJSONData = () => {
-    const coordinatesWithData = [
-      {
-        coordinates: [-51.23, -30.03],
-        properties: {},
-      },
-      {
-        coordinates: [-51.13, -30.13],
-        properties: { das: 23423 },
-      },
-    ];
+    if (!coordinatesWithData) return;
 
     const data = new GeoJSONClass({
       coordinatesWithData,
@@ -66,7 +64,7 @@ function MapContent() {
         }}
         className="h-[600px] w-full"
       >
-        {loadingMap ? (
+        {loadingMap || isLoadingCSVData ? (
           <div
             style={{
               display: "flex",

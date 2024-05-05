@@ -1,10 +1,10 @@
 interface IPoint {
-  type: "Point";
+  type: "Point" | "Polygon" | "Line" | "MultiPolygon" | "Multiline";
   coordinates: number[];
 }
 
 class Point implements IPoint {
-  public type: "Point";
+  public type: "Point" | "Polygon" | "Line" | "MultiPolygon" | "Multiline";
   public coordinates: number[];
 
   constructor(coordinates: number[]) {
