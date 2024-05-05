@@ -1,14 +1,9 @@
-import {
-  MapContainer,
-  Popup,
-  TileLayer,
-  Marker,
-  GeoJSON as LeafletGeoJSON,
-} from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
+import { GeoJSON, Marker } from "leaflet";
 import { useRef, useState } from "react";
 import { Map } from "leaflet";
 import CircularProgress from "@mui/material/CircularProgress";
-import { GeoJSON } from "../classes/GeoJSON";
+import { GeoJSON as GeoJSONClass } from "../classes/GeoJSON";
 import useGeoLocation from "../hooks/useGeolocation";
 
 function MapContent() {
@@ -29,20 +24,32 @@ function MapContent() {
   const renderGeoJSONData = () => {
     const coordinatesWithData = [
       {
-        coordinates: [-30.03, -51.23],
+        coordinates: [-51.23, -30.03],
         properties: {},
       },
       {
-        coordinates: [-30.13, -51.13],
+        coordinates: [-51.13, -30.13],
         properties: { das: 23423 },
       },
     ];
 
-    const data = new GeoJSON({
+    const data = new GeoJSONClass({
       coordinatesWithData,
     });
 
-    return <LeafletGeoJSON data={data} />;
+    var layer = new GeoJSON(data, {
+      style: {},
+      pointToLayer: (feature, latlng) => {
+        return new Marker(latlng);
+      },
+      onEachFeature: (feature, layer) => {
+        layer.on("click", () => {
+          console.log("clicou em:", layer);
+        });
+      },
+    });
+
+    mapRef.current?.addLayer(layer);
   };
 
   return (
@@ -76,11 +83,6 @@ function MapContent() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={userCoords}>
-              <Popup>
-                A pretty CSS3 popup. <br /> Easily customizable.
-              </Popup>
-            </Marker>
 
             {renderGeoJSONData()}
           </>

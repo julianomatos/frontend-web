@@ -14,26 +14,20 @@ class Point implements IPoint {
 }
 
 interface IFeature {
-  feature: {
-    type: "Feature";
-    geometry: IPoint;
-    properties: { [x: string]: unknown };
-  };
+  type: "Feature";
+  geometry: IPoint;
+  properties: { [key: string]: unknown };
 }
 
 class Feature implements IFeature {
-  public feature: {
-    type: "Feature";
-    geometry: IPoint;
-    properties: { [x: string]: unknown };
-  };
+  public type: "Feature";
+  public geometry: IPoint;
+  public properties: { [key: string]: unknown };
 
-  constructor(coordinates: number[], properties: { [x: string]: unknown }) {
-    this.feature = {
-      type: "Feature",
-      geometry: new Point(coordinates),
-      properties,
-    };
+  constructor(coordinates: number[], properties: { [key: string]: unknown }) {
+    this.type = "Feature";
+    this.geometry = new Point(coordinates);
+    this.properties = properties;
   }
 }
 
