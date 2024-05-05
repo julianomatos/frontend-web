@@ -12,7 +12,7 @@ const Header = () => {
             />
             <h1 className="text-[34px] font-semibold ml-2">RS</h1>
           </div>
-          <nav className="hidden desktop:block">
+          <nav className="hidden tablet:block">
             <ul className="flex space-x-4 text-lg font-bold">
               <li>
                 <a
